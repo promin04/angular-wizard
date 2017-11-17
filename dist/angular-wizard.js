@@ -19,7 +19,7 @@ angular.module("wizard.html", []).run(["$templateCache", function($templateCache
     "\n" +
     "    <div class=\"steps\" ng-if=\"indicatorsPosition === 'bottom'\" ng-transclude></div>\n" +
     "    <ul class=\"steps-indicator steps-{{getEnabledSteps().length}}\" ng-if=\"!hideIndicators\">\n" +
-    "      <li ng-class=\"{default: !step.completed && !step.selected, current: step.selected && !step.completed, done: step.completed && !step.selected, editing: step.selected && step.completed}\" ng-repeat=\"step in getEnabledSteps()\">\n" +
+    "      <li ng-click=\"goToRoute(step.wzPath)\" ng-class=\"{default: !step.completed && !step.selected, current: step.selected && !step.completed, done:step.wzDone, editing: step.selected && step.completed}\" ng-repeat=\"step in getEnabledSteps()\">\n" +
     "        <a ng-click=\"goTo(step)\">{{step.title || step.wzTitle}}</a>\n" +
     "      </li>\n" +
     "    </ul>\n" +
@@ -43,7 +43,9 @@ angular.module('mgo-angular-wizard').directive('wzStep', function() {
             disabled: '@?wzDisabled',
             description: '@',
             wzData: '=',
-            wzOrder: '@?'
+            wzOrder: '@?',
+            wzDone: '=',
+            wzPath: '@'
         },
         require: '^wizard',
         templateUrl: function(element, attributes) {
@@ -82,7 +84,7 @@ angular.module('mgo-angular-wizard').directive('wizard', function() {
         },
 
         //controller for wizard directive, treat this just like an angular controller
-        controller: ['$scope', '$element', '$log', 'WizardHandler', '$q', '$timeout', function ($scope, $element, $log, WizardHandler, $q, $timeout) {
+        controller: ['$scope', '$element', '$log', 'WizardHandler', '$q', '$timeout' ,'$location', function ($scope, $element, $log, WizardHandler, $q, $timeout,$location) {
             //setting default step position if none declared.
             if ($scope.indicatorsPosition == undefined) {
                 $scope.indicatorsPosition = 'bottom';
@@ -189,6 +191,15 @@ angular.module('mgo-angular-wizard').directive('wizard', function() {
             $scope.getStepNumber = function(step) {
                 return stepIdx(step) + 1;
             };
+
+            $scope.goToRoute = function(path) {
+
+              if (typeof path === 'string' && path) {
+
+                $location.path(path);
+              }
+
+            }
 
             $scope.goTo = function(step) {
                 //if this is the first time the wizard is loading it bi-passes step validation
@@ -430,7 +441,7 @@ angular.module('mgo-angular-wizard').directive('wizard', function() {
                     } else {
                         //go back one step from current step
                         $scope.goTo($scope.getEnabledSteps()[0]);
-                    }                	
+                    }
                 }
             };
 
@@ -482,27 +493,27 @@ wizardButtonDirective('wzReset');
 
 angular.module('mgo-angular-wizard').factory('WizardHandler', function() {
    var service = {};
-   
+
    var wizards = {};
-   
+
    service.defaultName = "defaultWizard";
-   
+
    service.addWizard = function(name, wizard) {
        wizards[name] = wizard;
    };
-   
+
    service.removeWizard = function(name) {
        delete wizards[name];
    };
-   
+
    service.wizard = function(name) {
        var nameToUse = name;
        if (!name) {
            nameToUse = service.defaultName;
        }
-       
+
        return wizards[nameToUse];
    };
-   
+
    return service;
 });

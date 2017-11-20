@@ -118,14 +118,14 @@
   width: calc(100% / 11);
 }
 .steps-indicator li.default {
-  /*pointer-events: none;*/
+  pointer-events: auto;
 }
 .steps-indicator li.default a:hover {
   color: #808080;
 }
 .steps-indicator li.current,
 .steps-indicator li.editing {
-  pointer-events: none;
+  pointer-events: none !important;
 }
 .steps-indicator li.current a:before {
   background-color: #808080;
